@@ -43,6 +43,7 @@
         const blob = new Blob(recordedChunks, { type: 'video/webm' });
         const formData = new FormData();
         formData.append('video', blob, 'recorded-video.webm');
+        formData.append('VideoReport', VideoReport); 
         var csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
 
         // Send the video via fetch to your 'save_video' URL
@@ -66,18 +67,22 @@
     });
 
   const startButton = document.getElementById('main-button');
-  let status = "Passive";
-  
+  let VideoOnRecord = false;
+  let startTime = new Date(); // Начало записи
+  let VideoReport = []; // Отчет со хронометражем нарушений
+
   startButton.addEventListener('click', () => {
-    if (status == "Passive") {
-      status = "Active";
+    if (!VideoOnRecord) {
+      VideoOnRecord = true;
       startButton.textContent = 'Stop Recording';
       startButton.className = 'btn btn-danger';
 
       // Start recording
       mediaRecorder.start();
+      startTime = new Date();
+      VideoReport = [];
     } else {
-      status = "Passive";
+      VideoOnRecord = false;
       startButton.textContent = 'Start Recording';
       startButton.className = 'btn btn-primary';
 
@@ -121,15 +126,20 @@
           record.push(1);
         }
         //Analyze the constants, throw alerts if necessary
-        if (record.length>20) { 
-          if (record[record.length-21]===0){
+        if (record.length>100) { 
+          if (record[record.length-101]===0){
             zero-=1;
           }
-          else if (record[record.length-21]===2){
+          else if (record[record.length-101]===2){
             two-=1;
           }
-          if (zero>7){
+          if (zero>95){
+            //Potential cheating report
+            currentTime = new Date();
+            TimeOnVideo = Math.floor((currentTime - startTime) / 1000); //Добавить нарушение в отчет
+            VideoReport.push(TimeOnVideo);
             if (!alertDisplayed) {
+            console.log(record);
             alertDisplayed = true; 
             const alertDiv = document.createElement('div');
             alertDiv.className = 'alert alert-danger alert-dismissible fade show';
@@ -147,10 +157,16 @@
               alertDisplayed = false;
               alertDiv.classList.remove('show');
               setTimeout(() => alertDiv.remove(), 150);
+              record = [];
+              zero = 0;
+              two = 0;
             });
           }
           }
-          else if (two>4){
+          else if (two>20){
+            currentTime = new Date();
+            TimeOnVideo = Math.floor((currentTime - startTime) / 1000); //Добавить нарушение в отчет
+            VideoReport.push(TimeOnVideo);
             if (!alertDisplayed) {
             alertDisplayed = true; 
             const alertDiv = document.createElement('div');
@@ -169,6 +185,9 @@
               alertDisplayed = false;
               alertDiv.classList.remove('show');
               setTimeout(() => alertDiv.remove(), 150);
+              zero = 0;
+              two = 0;
+              record = [];
             });
           }
           }
