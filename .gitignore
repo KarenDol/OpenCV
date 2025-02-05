@@ -1,0 +1,15 @@
+/myenv
+/CV/__pycache__/*
+/OpenCV/__pycache__/*
+/CV/migrations/__pycache__/*
+
+.installed.cfg
+bin
+develop-eggs
+dist
+downloads
+eggs
+parts
+src/*.egg-info
+lib
+lib64
