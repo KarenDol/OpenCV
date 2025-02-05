@@ -112,8 +112,8 @@
       const alertSound = new Audio('{% static "alert.mp4" %}');
 
       let record = [];
-      let zero = 0;
-      let two = 0;
+      let noFaceCounter = 0;
+      let manyFacesCounter = 0;
 
       setInterval(async () => {
         const detections = await faceapi.detectAllFaces(
@@ -133,21 +133,21 @@
         //Populate the record array, update constants
         if (resizedDetections.length < 1) {
           record.push(0);
-          zero += 1;
+          noFaceCounter += 1;
         } else if (resizedDetections.length > 1) {
           record.push(2);
-          two += 1;
+          manyFacesCounter += 1;
         } else {
           record.push(1);
         }
         //Analyze the constants, throw alerts if necessary
         if (record.length > 100) {
           if (record[record.length - 101] === 0) {
-            zero -= 1;
+            noFaceCounter -= 1;
           } else if (record[record.length - 101] === 2) {
-            two -= 1;
+            manyFacesCounter -= 1;
           }
-          if (zero > 95) {
+          if (noFaceCounter > 95) {
             //Potential cheating report
             currentTime = new Date();
             TimeOnVideo = Math.floor((currentTime - startTime) / 1000); //Добавить нарушение в отчет
@@ -177,11 +177,11 @@
                   alertDiv.classList.remove("show");
                   setTimeout(() => alertDiv.remove(), 150);
                   record = [];
-                  zero = 0;
-                  two = 0;
+                  noFaceCounter = 0;
+                  manyFacesCounter = 0;
                 });
             }
-          } else if (two > 20) {
+          } else if (manyFacesCounter > 20) {
             currentTime = new Date();
             TimeOnVideo = Math.floor((currentTime - startTime) / 1000); //Добавить нарушение в отчет
             VideoReport.push(TimeOnVideo);
@@ -208,8 +208,8 @@
                   alertDisplayed = false;
                   alertDiv.classList.remove("show");
                   setTimeout(() => alertDiv.remove(), 150);
-                  zero = 0;
-                  two = 0;
+                  noFaceCounter = 0;
+                  manyFacesCounter = 0;
                   record = [];
                 });
             }
